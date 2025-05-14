@@ -34,6 +34,7 @@ export async function POST(req) {
         return NextResponse.json({ error: "Missing email or planName" }, { status: 400 });
       }
 
+      // Assign credits based on plan
       let creditsToAdd = 0;
       if (planName === "Basic") creditsToAdd = 300;
       else if (planName === "Standard") creditsToAdd = 1200;
@@ -44,9 +45,11 @@ export async function POST(req) {
       const currentCredits = userSnap.exists() ? userSnap.data().credits || 0 : 0;
       let updatedCredits = currentCredits + creditsToAdd;
 
+      // 🔒 Handle watermark removal only if logoId is provided
       if (logoId) {
         const logoRef = doc(db, "users", email, "logos", logoId);
         const logoSnap = await getDoc(logoRef);
+
         if (logoSnap.exists()) {
           await updateDoc(logoRef, {
             isWaterMark: false
@@ -54,14 +57,15 @@ export async function POST(req) {
           updatedCredits -= 1;
           console.log(`🖼️ Removed watermark from logo ${logoId} and deducted 1 credit`);
         } else {
-          console.warn(`Logo document not found: ${logoId}`);
+          console.warn(`⚠️ Logo document not found: ${logoId}`);
         }
       }
 
+      // 🔄 Update user's plan and credits
       await updateDoc(userRef, {
         credits: updatedCredits,
         planName: planName,
-        subscription: planName // 👈 Add this line to update the subscription field
+        subscription: planName
       });
 
       console.log(`✅ Added ${creditsToAdd} credits to ${email} for the ${planName} plan`);
@@ -72,7 +76,7 @@ export async function POST(req) {
       message: "Webhook processed successfully"
     });
   } catch (error) {
-    console.error("Lemon Squeezy webhook error:", error);
+    console.error("❌ Lemon Squeezy webhook error:", error);
     return NextResponse.json(
       { error: "Webhook processing failed", details: error.message },
       { status: 500 }

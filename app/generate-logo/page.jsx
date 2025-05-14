@@ -56,11 +56,10 @@ function GenerateLogo() {
   const GenerateAILogo = async () => {
     if (!userDetail) return;
 
-    // Check credits for non-free users
-    if (userDetail.subscription !== "free" && userDetail.credits < 1) {
-      toast.error("Insufficient credits. Please purchase more.");
-      setShowNoCreditsDialog(true);
-      return;
+    // Only check credits for free users who want watermark-free logos
+    if (userDetail.subscription === "free" && userDetail.credits < 1) {
+      // Don't show dialog yet - just generate with watermark
+      // The dialog will show when they try to remove watermark
     }
 
     setLoading(true);
@@ -187,6 +186,8 @@ function GenerateLogo() {
                 }
                 credits={userDetail?.credits}
                 subscription={userDetail?.subscription}
+                logoId={logoId}
+                email={userDetail?.email}
               />
             )}
           </>

@@ -1,22 +1,21 @@
-'use client';
+"use client";
 import { UserDetailContex } from "../../_context/UserDetailContext";
 import { db } from "../../../configs/FirebaseConfig";
 import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 import EmptyState from "./EmptyState";
 import React, { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "../../../components/ui/button";
 import { toast } from "sonner";
 import { NoCreditsDialog } from "../../generate-logo/_components/NoCreditsDialog";
-import { downloadLogo } from "../../logo-success/action/downloadLogoAction"; 
+import { downloadLogo } from "../../logo-success/action/downloadLogoAction";
 
 function LogoList() {
   const { userDetail, setUserDetail } = useContext(UserDetailContex);
   const [logoList, setLogoList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNoCreditsDialog, setShowNoCreditsDialog] = useState(false);
-  const router = useRouter();
+  const [downloadingLogoId, setDownloadingLogoId] = useState(null);
 
   useEffect(() => {
     const getUserLogos = async () => {
@@ -41,27 +40,27 @@ function LogoList() {
 
   const handleDownload = async (logo) => {
     if (!userDetail) return;
+    setDownloadingLogoId(logo.id); // Start loading
 
     try {
-      const zipBuffer = await downloadLogo(logo.id, userDetail.email); // Call the downloadLogo function
+      const zipBuffer = await downloadLogo(logo.id, userDetail.email);
+      const zipBlob = new Blob([Buffer.from(zipBuffer, "base64")], {
+        type: "application/zip",
+      });
 
-      // Create a Blob from the base64 zip buffer
-      const zipBlob = new Blob([Buffer.from(zipBuffer, "base64")], { type: "application/zip" });
-      
-      // Create a download link and trigger the download
       const zipUrl = URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
       link.href = zipUrl;
-      link.download = `${logo.title || 'logo'}_download.zip`; // Set a default name for the zip file
+      link.download = `${logo.title || "logo"}_download.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // Clean up the Blob URL
       URL.revokeObjectURL(zipUrl);
     } catch (err) {
       console.error("Download failed:", err);
       toast.error("Download failed. Please try again.");
+    } finally {
+      setDownloadingLogoId(null); // Stop loading
     }
   };
 
@@ -76,24 +75,28 @@ function LogoList() {
       const userRef = doc(db, "users", userDetail.email);
       await updateDoc(userRef, {
         credits: userDetail.credits - 1,
-        usedCredits: (userDetail.usedCredits || 0) + 1
+        usedCredits: (userDetail.usedCredits || 0) + 1,
       });
 
       // Update logo document
       const logoRef = doc(db, "users", userDetail.email, "logos", logo.id);
       await updateDoc(logoRef, {
         isWaterMark: false,
-        image: logo.imageOriginal
+        image: logo.imageOriginal,
       });
 
       // Update local state
-      setLogoList(prev => prev.map((l) => 
-        l.id === logo.id ? { ...l, isWaterMark: false, image: l.imageOriginal } : l
-      ));
-      setUserDetail(prev => ({
+      setLogoList((prev) =>
+        prev.map((l) =>
+          l.id === logo.id
+            ? { ...l, isWaterMark: false, image: l.imageOriginal }
+            : l
+        )
+      );
+      setUserDetail((prev) => ({
         ...prev,
         credits: prev.credits - 1,
-        usedCredits: (prev.usedCredits || 0) + 1
+        usedCredits: (prev.usedCredits || 0) + 1,
       }));
 
       toast.success("Watermark removed successfully!");
@@ -105,7 +108,7 @@ function LogoList() {
 
   return (
     <div className="mt-10 px-4 sm:px-6 mb-12 lg:px-12 xl:px-20">
-      <NoCreditsDialog 
+      <NoCreditsDialog
         open={showNoCreditsDialog}
         onOpenChange={setShowNoCreditsDialog}
       />
@@ -142,9 +145,7 @@ function LogoList() {
                 <h2 className="text-center text-lg font-medium">
                   {logo.title}
                 </h2>
-                <p className="text-sm text-gray-500 text-center">
-                  {logo.desc}
-                </p>
+                <p className="text-sm text-gray-500 text-center">{logo.desc}</p>
 
                 <div className="mt-4 flex justify-center gap-2">
                   {logo.isWaterMark ? (
@@ -153,16 +154,24 @@ function LogoList() {
                       className="bg-primary hover:bg-primary-dark w-full"
                       disabled={userDetail?.credits < 1}
                     >
-                      {userDetail?.credits < 1 
-                        ? "Need Credits" 
-                        : `Remove Watermark (${userDetail?.credits} Left)` }
+                      {userDetail?.credits < 1
+                        ? "Need Credits"
+                        : `Remove Watermark (${userDetail?.credits} Left)`}
                     </Button>
                   ) : (
                     <Button
-                      onClick={() => handleDownload(logo)} // Use the updated handleDownload method
+                      onClick={() => handleDownload(logo)}
                       className="bg-green-600 hover:bg-green-700 w-full"
+                      disabled={downloadingLogoId === logo.id}
                     >
-                      Download
+                      {downloadingLogoId === logo.id ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                          Downloading...
+                        </span>
+                      ) : (
+                        "Download"
+                      )}
                     </Button>
                   )}
                 </div>
