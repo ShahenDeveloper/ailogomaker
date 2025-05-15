@@ -132,13 +132,13 @@ function LogoList() {
                   className="w-full rounded-xl object-cover"
                   alt={logo.title}
                 />
-                {logo.isWaterMark && (
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-xl">
+                {/* {logo.isWaterMark && (
+                  <div className="absolute inset-0 bg-black bg-opacity-10 flex items-center justify-center rounded-xl">
                     <span className="text-white font-bold text-lg">
                       Watermarked Preview
                     </span>
                   </div>
-                )}
+                )} */}
               </div>
 
               <div className="p-2">

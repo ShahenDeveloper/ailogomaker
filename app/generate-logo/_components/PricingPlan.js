@@ -1,7 +1,6 @@
 export const pricingPlans = [
   {
     name: "Free",
-    price: "$0",
     pricingId: "free",
     features: {
       "Monthly Credits": "5 credits",
@@ -11,7 +10,6 @@ export const pricingPlans = [
   },
   {
     name: "Basic",
-    price: "$5",
     pricingId: "799167",
     features: {
       "Create 300 Logo": true,
@@ -24,7 +22,6 @@ export const pricingPlans = [
   },
   {
     name: "Standard",
-    price: "$10",
     pricingId: "799168",
     features: {
       "Create 1200 Logo": true,
@@ -37,7 +34,6 @@ export const pricingPlans = [
   },
   {
     name: "Premium",
-    price: "$15",
     pricingId: "799173",
     features: {
       "Create 1800 Logo": true,

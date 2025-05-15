@@ -5,7 +5,7 @@ import { useContext } from "react";
 
 export default function Info() {
   const { userDetail } = useContext(UserDetailContex);
-  console.log(userDetail)
+
   
   return (
     <div className="p-6 bg-muted/50 rounded-lg shadow-sm">

@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../../components/ui/button";
-import { fetchPricingPlans } from "../generate-logo/action/fetchPricingForUsers";
+// import { fetchPricingPlans } from "../generate-logo/action/fetchPricingForUsers";
 import LemonSqueezyCheckout from "../generate-logo/_components/LemonSqueezy";
+import { fetchPricingPlans } from "./actions/fetchPricingPlan";
 
 export default function PricingPage() {
   const { user, isSignedIn } = useUser();
@@ -20,7 +21,7 @@ export default function PricingPage() {
 
   const email = user?.primaryEmailAddress?.emailAddress;
 
-  useEffect(() => {
+useEffect(() => {
     const loadPlans = async () => {
       try {
         const fetchedPlans = await fetchPricingPlans();
@@ -32,6 +33,7 @@ export default function PricingPage() {
         setLoading(false);
       }
     };
+
     loadPlans();
   }, []);
 
