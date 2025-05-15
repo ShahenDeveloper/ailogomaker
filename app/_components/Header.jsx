@@ -19,10 +19,18 @@ function Header() {
         />
       </Link>
 
+
+
+
       <div className="hidden md:flex items-center gap-3">
+        
+        <Link href="/hire-designer" >
+          <Button  className="px-7" variant="outline">Hire Us</Button>
+        </Link>
         <Link href="/pricing" className="hover:text-primary transition">
           <Button variant="ghost">Pricing</Button>
         </Link>
+        
 
         {user ? (
           <Link href="/dashboard">
