@@ -12,6 +12,11 @@ export const metadata = {
   title: "LogoMaker",
   description:
     "Create stunning logos instantly with our AI-powered logo maker. Fast, free, and fully customizable.",
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -23,6 +28,7 @@ export default function RootLayout({ children }) {
             name="google-site-verification"
             content="PAUk7bnRH4Q0FJcKPmHXEnAp_Ly_RfSEUgnGE3NOTSE"
           />
+          <meta name="robots" content="index, follow" />
         </head>
         <body className={host_Grotesk.className}>
           <Provider>{children}</Provider>

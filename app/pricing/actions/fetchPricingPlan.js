@@ -18,12 +18,12 @@ const plans = await fetchPlans();
     const variants = data.data;
     const updatedPlans = plans.map((plan) => {
       if (plan.pricingId === "free") {
-        return { ...plan, price: "Rs.0.00" };
+        return { ...plan, price: "$0.00" };
       }
 
       const variant = variants.find((v) => v.id.toString() === plan.pricingId);
       const priceInCents = variant?.attributes?.price || 0;
-      const formattedPrice = `Rs.${(priceInCents / 100).toFixed(2)}`;
+      const formattedPrice = `$${(priceInCents / 100).toFixed(2)}`;
 
       return {
         ...plan,
