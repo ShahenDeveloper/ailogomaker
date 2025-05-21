@@ -10,7 +10,7 @@ const DemoSection = () => {
     <motion.section
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ amount: 0.5, once: true }} // Adjust 'amount' as needed
+      viewport={{ amount: 0.5, once: true }} 
       className="relative mt-32"
     >
       {" "}
@@ -23,11 +23,12 @@ const DemoSection = () => {
           </div>
           <div className="text-center mb-16">
             <h3 className="font-bold text-3xl max-w-2xl mx-auto px-4 sm:px-6">
-              Watch how Logoipsum transforms{" "}
+              Watch how Logomakers transforms{" "}
               <span className="!text-rose-600 font-bold text-transparent">
                 your ideas
               </span>{" "}
               into stunning, professional logos in seconds!
+              Design a 
             </h3>
           </div>
 

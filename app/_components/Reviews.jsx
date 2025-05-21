@@ -150,7 +150,7 @@ const Reviews = () => {
     <div className="relative max-w-9xl mt-24 h-full mx-auto px-2.5 md:px-20">
       <h1 className="text-center font-extrabold text-4xl sm:text-5xl leading-tight tracking-tight">
         What You’ll Gain From{" "}
-        <span className="text-rose-600">Logoipsum</span>
+        <span className="text-rose-600">Logomakers</span>
       </h1>
       <ReviewGrid />
     </div>

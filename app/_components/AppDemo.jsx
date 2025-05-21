@@ -11,7 +11,6 @@ const stepTexts = [
   "Pick a Color Palette That Matches Your Vibe",
   "Choose a Logo Style That Speaks for You",
   "Select a Design Concept You Love",
-  "Pick Your AI Design Plan to Generate the Logo",
   "Wait for Your Logo to Generate",
   "Get Your Desired Logo!"
 ];

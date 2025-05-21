@@ -56,7 +56,6 @@ export default {
       { src: "/demo5.png", alt: "Fifth Slide" },
       { src: "/demo6.png", alt: "Sixth Slide" },
       { src: "/demo7.png", alt: "Seventh Slide" },
-      { src: "/demo8.png", alt: "Eighth Slide" },
     ],
   };
   
