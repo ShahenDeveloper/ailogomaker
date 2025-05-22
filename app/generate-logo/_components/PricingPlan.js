@@ -22,7 +22,7 @@ export const pricingPlans = [
   },
   {
     name: "Standard",
-    pricingId: "799168",
+    pricingId: "814299",
     features: {
       "Create 1200 Logo": true,
       "Watermarked Logos": false,
@@ -34,7 +34,7 @@ export const pricingPlans = [
   },
   {
     name: "Premium",
-    pricingId: "799173",
+    pricingId: "814300",
     features: {
       "Create 1800 Logo": true,
       "Watermarked Logos": false,

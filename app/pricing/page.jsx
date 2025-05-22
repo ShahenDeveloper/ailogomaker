@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button";
 // import { fetchPricingPlans } from "../generate-logo/action/fetchPricingForUsers";
 import LemonSqueezyCheckout from "../generate-logo/_components/LemonSqueezy";
 import { fetchPricingPlans } from "./actions/fetchPricingPlan";
+import {seedPricingPlans} from "./actions/seedData"
 
 export default function PricingPage() {
   const { user, isSignedIn } = useUser();
