@@ -9,7 +9,7 @@ const host_Grotesk = Host_Grotesk({
 });
 
 export const metadata = {
-  title: "LogoMaker",
+  title: "Badge Bloom",
   description:
     "Create stunning logos instantly with our AI-powered logo maker. Fast, free, and fully customizable.",
   robots: {

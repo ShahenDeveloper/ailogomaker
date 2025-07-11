@@ -6,7 +6,7 @@ export default function TermsOfUsePage() {
         <section className="mb-6">
           <h2 className="text-2xl font-semibold mb-2">Introduction</h2>
           <p className="text-gray-700">
-            Logomakers.online operates this website. By accessing or using our site, you agree to these Terms of Use.
+            badgebloom.com operates this website. By accessing or using our site, you agree to these Terms of Use.
           </p>
         </section>
   

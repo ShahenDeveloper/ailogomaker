@@ -23,7 +23,7 @@ const DemoSection = () => {
           </div>
           <div className="text-center mb-16">
             <h3 className="font-bold text-3xl max-w-2xl mx-auto px-4 sm:px-6">
-              Watch how Logomakers transforms{" "}
+              Watch how Badge Bloom transforms{" "}
               <span className="!text-rose-600 font-bold text-transparent">
                 your ideas
               </span>{" "}
