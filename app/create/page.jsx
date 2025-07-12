@@ -9,7 +9,6 @@ import LogoDesc from "./_components/LogoDesc";
 import LogoPalette from "./_components/LogoPalette";
 import LogoDesigns from "./_components/LogoDesigns";
 import LogoIdea from "./_components/LogoIdea";
-import PricingModel from "./_components/PricingModel";
 import BgGradient from "../_components/BgGradient";
 
 function CreateLogo() {
@@ -26,7 +25,7 @@ function CreateLogo() {
 
   const handleContinue = () => {
     if (step === 5) {
-      router.push("/generate-logo"); 
+      router.push("/generate-logo");
     } else {
       setStep(step + 1);
     }
