@@ -24,6 +24,8 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en">
         <head>
+          <link rel="icon" href="/images/favicon.ico" sizes="any" />
+
           <meta
             name="google-site-verification"
             content="PAUk7bnRH4Q0FJcKPmHXEnAp_Ly_RfSEUgnGE3NOTSE"
