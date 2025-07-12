@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import Replicate from "replicate";
 import sharp from "sharp";
 
+
 export const maxDuration = 300;
 
 export async function POST(req) {
