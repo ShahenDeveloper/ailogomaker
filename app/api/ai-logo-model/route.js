@@ -49,7 +49,7 @@ export async function POST(req) {
     const imageUrl = output[0];
     const [imageWithWatermark, imageWithoutWatermark] = await Promise.all([
       ConvertImageToBase64(imageUrl, true),
-      ConvertImageToBase64(imageUrl, false)
+      ConvertImageToBase64(imageUrl, false),
     ]);
 
     const docId = Date.now().toString();
@@ -80,11 +80,10 @@ export async function POST(req) {
       usedCredit: hasCredits,
       isWaterMark: shouldWatermark,
     });
-
   } catch (e) {
     console.error("API Error:", e);
     return NextResponse.json(
-      { error: e.message || "Generation failed" }, 
+      { error: e.message || "Generation failed" },
       { status: 500 }
     );
   }
@@ -100,16 +99,18 @@ async function ConvertImageToBase64(imageUrl, addWatermark = false) {
     let processedImage;
     if (addWatermark) {
       const watermark = await sharp(watermarkImagePath)
-        .resize(500, 500) 
+        .resize(500, 500)
         .toBuffer();
 
       processedImage = await sharp(imageBuffer)
         .resize(800, 800)
-        .composite([{
-          input: watermark,
-          gravity: "center", // Changed to center position
-          blend: "over"
-        }])
+        .composite([
+          {
+            input: watermark,
+            gravity: "center", // Changed to center position
+            blend: "over",
+          },
+        ])
         .jpeg({ quality: 80 })
         .toBuffer();
     } else {
