@@ -1,7 +1,7 @@
 // app/api/webhook/stripe/route.js
 import { NextResponse } from "next/server";
-import { stripe } from "../../../lib/stripe";
-import { db } from "../../../configs/FirebaseConfig"; // or your DB setup
+import stripe from "../../../../lib/stripe";
+import { db } from "../../../../configs/FirebaseConfig"; // or your DB setup
 
 export async function POST(req) {
   const payload = await req.text();
