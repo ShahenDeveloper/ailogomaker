@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../../components/ui/button";
 // import { fetchPricingPlans } from "../generate-logo/action/fetchPricingForUsers";
 import LemonSqueezyCheckout from "../generate-logo/_components/LemonSqueezy";
+import StripeCheckout from "../generate-logo/_components/StripeCheckout";
+
 import { fetchPricingPlans } from "./actions/fetchPricingPlan";
-import {seedPricingPlans} from "./actions/seedData"
+import { seedPricingPlans } from "./actions/seedData";
 
 export default function PricingPage() {
   const { user, isSignedIn } = useUser();
@@ -22,7 +24,7 @@ export default function PricingPage() {
 
   const email = user?.primaryEmailAddress?.emailAddress;
 
-useEffect(() => {
+  useEffect(() => {
     const loadPlans = async () => {
       try {
         const fetchedPlans = await fetchPricingPlans();
@@ -56,63 +58,81 @@ useEffect(() => {
 
       {!selectedPlan ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {pricingPlans.map((plan, idx) => (
-            <div
-              key={idx}
-              className="border rounded-xl p-6 hover:shadow-lg transition-shadow"
-            >
-              <h3 className="text-xl font-bold text-center">{plan.name}</h3>
-              <p className="text-2xl font-bold text-center my-4">
-                {plan.price}
-              </p>
-              <p className="text-center mb-4">{plan.credits} Credits</p>
-
-              <div className="space-y-3 mb-6">
-                {Object.entries(plan.features).map(([feature, value], idx) => (
-                  <div key={idx} className="flex items-center">
-                    {typeof value === "boolean" ? (
-                      value ? (
-                        <span className="text-green-500 mr-2">✔</span>
-                      ) : (
-                        <span className="text-gray-400 mr-2">—</span>
-                      )
-                    ) : (
-                      <span className="mr-2">•</span>
-                    )}
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
-
-              {isSignedIn ? (
-                <Button
-                  className="w-full"
-                  onClick={() => handlePlanSelect(plan)}
-                >
-                  {plan.name === "Free" ? "Current Plan" : "Select Plan"}
-                </Button>
-              ) : (
-                <div className="w-full sm:w-auto">
-                  <SignInButton
-                    mode="modal"
-                    fallbackRedirectUrl={logoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/logo-success?logoId=${logoId}` : `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`}
-                  >
-                    <Button className="w-full">
-                      {plan.name === "Free" ? "Current Plan" : "Select Plan"}
-                    </Button>
-                  </SignInButton>
+          {pricingPlans
+            .filter(
+              (plan) =>
+                plan.credits > 0 &&
+                isNaN(Number(plan.name)) &&
+                !plan.name.startsWith("price_") &&
+                plan.pricingId
+            )
+            .map((plan, idx) => (
+              <div
+                key={idx}
+                className="border rounded-xl p-6 hover:shadow-lg transition-shadow"
+              >
+                <h3 className="text-xl font-bold text-center">{plan.name}</h3>
+                <p className="text-2xl font-bold text-center my-4">
+                  {plan.price}
+                </p>
+                <p className="text-center mb-4">{plan.credits} Credits</p>
+                <div className="space-y-3 mb-6">
+                  {Object.entries(plan.features).map(
+                    ([feature, value], idx) => (
+                      <div key={idx} className="flex items-center">
+                        {typeof value === "boolean" ? (
+                          value ? (
+                            <span className="text-green-500 mr-2">✔</span>
+                          ) : (
+                            <span className="text-gray-400 mr-2">—</span>
+                          )
+                        ) : (
+                          <span className="mr-2">•</span>
+                        )}
+                        <span>{feature}</span>
+                      </div>
+                    )
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+                {isSignedIn ? (
+                  <Button
+                    className="w-full"
+                    onClick={() => handlePlanSelect(plan)}
+                  >
+                    {plan.name === "Free" ? "Current Plan" : "Select Plan"}
+                  </Button>
+                ) : (
+                  <div className="w-full sm:w-auto">
+                    <SignInButton
+                      mode="modal"
+                      fallbackRedirectUrl={
+                        logoId
+                          ? `${process.env.NEXT_PUBLIC_BASE_URL}/logo-success?logoId=${logoId}`
+                          : `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`
+                      }
+                    >
+                      <Button className="w-full">
+                        {plan.name === "Free" ? "Current Plan" : "Select Plan"}
+                      </Button>
+                    </SignInButton>
+                  </div>
+                )}
+              </div>
+            ))}
         </div>
       ) : (
         <div className="max-w-2xl mx-auto">
-          <LemonSqueezyCheckout
+          {/* <LemonSqueezyCheckout
             productId={selectedPlan.pricingId}
             email={email}
             planName={selectedPlan.name}
             logoId={logoId}
+          /> */}
+          <StripeCheckout
+            email={user.primaryEmailAddress.emailAddress}
+            planName={selectedPlan.name}
+            logoId={logoId}
+            productId={selectedPlan.pricingId}
           />
           <Button
             variant="outline"
