@@ -1,11 +1,9 @@
-// app/api/checkout/route.js
 import { stripe } from "../../../lib/stripe";
 
 export async function POST(req) {
   try {
     const { email, planName, logoId, productId } = await req.json();
    
-    // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],

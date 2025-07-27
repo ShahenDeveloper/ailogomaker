@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe } from "../../../../lib/stripe";
 import { db } from "../../../../configs/FirebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function POST(req) {
   const payload = await req.text();
@@ -35,7 +36,6 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    // Assign credits based on plan
     let creditsToAdd = 0;
     if (planName === "Basic") creditsToAdd = 300;
     else if (planName === "Standard") creditsToAdd = 1200;
@@ -46,7 +46,6 @@ export async function POST(req) {
     const currentCredits = userSnap.exists() ? userSnap.data().credits || 0 : 0;
     let updatedCredits = currentCredits + creditsToAdd;
 
-    // 🔒 Handle watermark removal only if logoId is provided
     if (logoId) {
       const logoRef = doc(db, "users", email, "logos", logoId);
       const logoSnap = await getDoc(logoRef);
@@ -57,27 +56,62 @@ export async function POST(req) {
         });
         updatedCredits -= 1;
         console.log(
-          `🖼️ Removed watermark from logo ${logoId} and deducted 1 credit`
+          ` Removed watermark from logo ${logoId} and deducted 1 credit`
         );
       } else {
-        console.warn(`⚠️ Logo document not found: ${logoId}`);
+        console.warn(` Logo document not found: ${logoId}`);
       }
     }
 
-    // 🔄 Update user's plan and credits
+    let usedCredits = 0;
+    if (userSnap.exists()) {
+      usedCredits = userSnap.data().usedCredits || 0;
+    }
+    let nextRenewal = null;
+    if (session.current_period_end) {
+      nextRenewal = new Date(session.current_period_end * 1000).toISOString();
+    }
     await updateDoc(userRef, {
       credits: updatedCredits,
       planName: planName,
       subscription: planName,
+      usedCredits: usedCredits,
+      ...(nextRenewal && { nextRenewal }),
     });
 
     console.log(
-      `✅ Added ${creditsToAdd} credits to ${email} for the ${planName} plan`
+      ` Added ${creditsToAdd} credits to ${email} for the ${planName} plan`
     );
   }
 
   if (event.type === "invoice.payment_succeeded") {
-    // Update subscription period, credits, etc.
+    const invoice = event.data.object;
+    const email = invoice.customer_email;
+    const planName = invoice.lines.data[0].description;
+
+    if (!email || !planName) {
+      return NextResponse.json(
+        { error: "Missing email or planName" },
+        { status: 400 }
+      );
+    }
+
+    let creditsToAdd = 0;
+    if (planName === "Basic") creditsToAdd = 300;
+    else if (planName === "Standard") creditsToAdd = 1200;
+    else if (planName === "Premium") creditsToAdd = 1800;
+
+    const userRef = doc(db, "users", email);
+    const userSnap = await getDoc(userRef);
+
+    await updateDoc(userRef, {
+      credits: (userSnap.data().credits || 0) + creditsToAdd,
+      planName: planName,
+      subscription: planName,
+      nextRenewal: new Date(invoice.period_end * 1000).toISOString(),
+    });
+
+    console.log(` Added ${creditsToAdd} credits to ${email} for the ${planName} plan`);
   }
 
   return NextResponse.json({ received: true });
