@@ -1,7 +1,6 @@
-// app/api/webhook/stripe/route.js
 import { NextResponse } from "next/server";
-import stripe from "../../../../lib/stripe";
-import { db } from "../../../../configs/FirebaseConfig"; // or your DB setup
+import { stripe } from "../../../../lib/stripe";
+import { db } from "../../../../configs/FirebaseConfig";
 
 export async function POST(req) {
   const payload = await req.text();
@@ -36,7 +35,6 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-
     // Assign credits based on plan
     let creditsToAdd = 0;
     if (planName === "Basic") creditsToAdd = 300;

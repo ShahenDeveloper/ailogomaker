@@ -14,12 +14,19 @@ function Dashboard() {
   useEffect(() => {
     const refreshUser = async () => {
       const userEmail = localStorage.getItem("userEmail");
+      const userName = localStorage.getItem("userName");
+      console.log("userEmail, userName in dashboard:", userEmail, userName);
       if (userEmail) {
-        const result = await axios.post("/api/users", { userEmail });
+        // Always send both userEmail and userName (if available)
+        const result = await axios.post("/api/users", { userEmail, userName });
         setUserDetail(result.data);
       }
     };
+
+    // Always refresh on mount
     refreshUser();
+
+    // Also refresh if payment was successful (Stripe redirects with ?success)
     if (searchParams.get("success")) {
       refreshUser();
     }

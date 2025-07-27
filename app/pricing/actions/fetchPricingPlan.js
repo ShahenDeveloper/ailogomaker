@@ -46,12 +46,16 @@ export async function fetchPricingPlans() {
   const prices = await stripe.prices.list({ active: true, limit: 10 });
 
   const planCredits = {
+    // price_1RoTY8GbJ1AxlUJijvhz9Arf: 300, // Basic
+    // price_1RoTaaGbJ1AxlUJisgjNvGsS: 1000, // Standard
+    // price_1RoTejGbJ1AxlUJilv7s8aMJ: 2100, // Premium
     price_1RoX2TLOSucFQ0CmRbu4fWJr: 300, // Basic
     price_1RoX4VLOSucFQ0CmNoWm32sP: 1000, // Standard
     price_1RoX6VLOSucFQ0Cm7VPn0XZv: 2100, // Premium
   };
 
   const planFeatures = {
+    // price_1RoTY8GbJ1AxlUJijvhz9Arf: {
     price_1RoX2TLOSucFQ0CmRbu4fWJr: {
       "Create 300 Logo": true,
       "Watermarked Logos": false,
@@ -60,6 +64,7 @@ export async function fetchPricingPlans() {
       "800x800 Logo": true,
       "Download Unlimited Times": true,
     },
+    // price_1RoTaaGbJ1AxlUJisgjNvGsS: {
     price_1RoX4VLOSucFQ0CmNoWm32sP: {
       "Create 1200 Logo": true,
       "Watermarked Logos": false,
@@ -68,6 +73,7 @@ export async function fetchPricingPlans() {
       "800x800 Logo": true,
       "Download Unlimited Times": true,
     },
+    // price_1RoTejGbJ1AxlUJilv7s8aMJ: {
     price_1RoX6VLOSucFQ0Cm7VPn0XZv: {
       "Create 1800 Logo": true,
       "Watermarked Logos": false,
