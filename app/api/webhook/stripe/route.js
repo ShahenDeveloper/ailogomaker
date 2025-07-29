@@ -1,119 +1,101 @@
 import { NextResponse } from "next/server";
 import { stripe } from "../../../../lib/stripe";
 import { db } from "../../../../configs/FirebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 export async function POST(req) {
   const payload = await req.text();
   const sig = req.headers.get("Stripe-Signature");
   if (!sig) {
-    console.error("Missing Stripe-Signature header");
-    return NextResponse.json({ error: "Missing Stripe-Signature header" }, 400);
+    return NextResponse.json(
+      { error: "Missing Stripe-Signature" },
+      { status: 400 }
+    );
   }
-  let event;
 
+  let event;
   try {
     event = stripe.webhooks.constructEvent(
       payload,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-  } catch (e) {
-    console.error("Webhook signature failed:", e);
+  } catch (err) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const session = event.data.object;
+  const eventRef = doc(db, "stripe_events", event.id);
+  if ((await getDoc(eventRef)).exists()) {
+    return NextResponse.json({ received: true });
+  }
+  await setDoc(eventRef, {
+    type: event.type,
+    received: new Date().toISOString(),
+  });
+
+  const planTiers = { Basic: 1, Standard: 2, Premium: 3 };
+  const creditMap = { Basic: 300, Standard: 1000, Premium: 2100 };
+  function normalizePlanName(name) {
+    if (!name) return null;
+    if (/basic/i.test(name)) return "Basic";
+    if (/standard/i.test(name)) return "Standard";
+    if (/premium/i.test(name)) return "Premium";
+    return null;
+  }
 
   if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    if (session.mode === "subscription") {
+      return NextResponse.json({ received: true });
+    }
     const email = session.customer_details?.email;
-    const planName = session.metadata?.planName;
-    const logoId = session.metadata?.logoId;
-
-    if (!email || !planName) {
+    const plan = normalizePlanName(session.metadata?.planName);
+    if (!email || !plan) {
       return NextResponse.json(
-        { error: "Missing email or planName" },
+        { error: "Invalid session data" },
         { status: 400 }
       );
     }
-    let creditsToAdd = 0;
-    if (planName === "Basic") creditsToAdd = 300;
-    else if (planName === "Standard") creditsToAdd = 1200;
-    else if (planName === "Premium") creditsToAdd = 1800;
-
     const userRef = doc(db, "users", email);
-    const userSnap = await getDoc(userRef);
-    const currentCredits = userSnap.exists() ? userSnap.data().credits || 0 : 0;
-    let updatedCredits = currentCredits + creditsToAdd;
-
-    if (logoId) {
-      const logoRef = doc(db, "users", email, "logos", logoId);
-      const logoSnap = await getDoc(logoRef);
-
-      if (logoSnap.exists()) {
-        await updateDoc(logoRef, {
-          isWaterMark: false,
-        });
-        updatedCredits -= 1;
-        console.log(
-          ` Removed watermark from logo ${logoId} and deducted 1 credit`
-        );
-      } else {
-        console.warn(` Logo document not found: ${logoId}`);
-      }
-    }
-
-    let usedCredits = 0;
-    if (userSnap.exists()) {
-      usedCredits = userSnap.data().usedCredits || 0;
-    }
-    let nextRenewal = null;
-    if (session.current_period_end) {
-      nextRenewal = new Date(session.current_period_end * 1000).toISOString();
-    }
-    await updateDoc(userRef, {
-      credits: updatedCredits,
-      planName: planName,
-      subscription: planName,
-      usedCredits: usedCredits,
-      ...(nextRenewal && { nextRenewal }),
-    });
-
-    console.log(
-      ` Added ${creditsToAdd} credits to ${email} for the ${planName} plan`
-    );
+    const snap = await getDoc(userRef);
+    const current = snap.exists() ? snap.data().credits || 0 : 0;
+    await updateDoc(userRef, { credits: current + creditMap[plan] });
+    return NextResponse.json({ received: true });
   }
 
   if (event.type === "invoice.payment_succeeded") {
     const invoice = event.data.object;
     const email = invoice.customer_email;
-    const planName = invoice.lines.data[0].description;
-
-    if (!email || !planName) {
+    const rawDesc = invoice.lines.data[0]?.description;
+    const plan = normalizePlanName(rawDesc);
+    if (!email || !plan) {
       return NextResponse.json(
-        { error: "Missing email or planName" },
+        { error: "Invalid invoice data" },
         { status: 400 }
       );
     }
 
-    let creditsToAdd = 0;
-    if (planName === "Basic") creditsToAdd = 300;
-    else if (planName === "Standard") creditsToAdd = 1200;
-    else if (planName === "Premium") creditsToAdd = 1800;
-
     const userRef = doc(db, "users", email);
-    const userSnap = await getDoc(userRef);
+    const snap = await getDoc(userRef);
+    const current = snap.exists() ? snap.data().credits || 0 : 0;
 
-    await updateDoc(userRef, {
-      credits: (userSnap.data().credits || 0) + creditsToAdd,
-      planName: planName,
-      subscription: planName,
+    const pending = snap.exists() ? snap.data().pendingPlan : null;
+    const finalPlan = pending?.name || plan;
+    const addCredits = creditMap[finalPlan];
+
+    const updateData = {
+      credits: current + addCredits,
+      planName: finalPlan,
+      planTier: planTiers[finalPlan],
+      subscription: finalPlan,
       nextRenewal: new Date(invoice.period_end * 1000).toISOString(),
-    });
+    };
+    if (pending) {
+      updateData.pendingPlan = null;
+    }
 
-    console.log(
-      ` Added ${creditsToAdd} credits to ${email} for the ${planName} plan`
-    );
+    await updateDoc(userRef, updateData);
+    return NextResponse.json({ received: true });
   }
 
   return NextResponse.json({ received: true });

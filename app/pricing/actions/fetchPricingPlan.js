@@ -2,23 +2,23 @@
 import { stripe } from "../../../lib/stripe";
 
 export async function fetchPricingPlans() {
-  const prices = await stripe.prices.list({ active: true, limit: 10 });
+  const productIds = {
+    // Basic: "prod_Sk14EOAwxQFgzj", //  Basic
+    // Standard: "prod_Sk16ZF1p1I2vdx", //  Standard
+    // Premium: "prod_Sk18C3KKCmSRQa", //  Premium
+    Basic: "prod_Skw0FM5XQ3zodM", //  Basic
+    Standard: "prod_Skw0ZxLIap9Tog", //  Standard
+    Premium: "prod_Skw11vjvPLocDz", //  Premium
+  };
 
   const planCredits = {
-    // test sstripe product prices
-    // price_1RpQ8QLOSucFQ0CmP14hYUPk: 300, // Basic
-    // price_1RpQ8iLOSucFQ0Cm7kCjKqLp: 1000, // Standard
-    // price_1RpQ9RLOSucFQ0CmsNQ1Huvk: 2100, // Premium
-
-    // live stripe product prices
-    price_1RolOHLOSucFQ0Cm1lvP2QvC: 300, // Basic 0.5$ price
-    // price_1RoX2TLOSucFQ0CmRbu4fWJr: 300, // Basic 2$ price
-    price_1RoX4VLOSucFQ0CmNoWm32sP: 1000, // Standard
-    price_1RoX6VLOSucFQ0Cm7VPn0XZv: 2100, // Premium
+    [productIds.Basic]: 300,
+    [productIds.Standard]: 1000,
+    [productIds.Premium]: 2100,
   };
 
   const planFeatures = {
-    price_1RolOHLOSucFQ0Cm1lvP2QvC: {
+    [productIds.Basic]: {
       "Create 300 Logo": true,
       "Watermarked Logos": false,
       "High Quality Png": true,
@@ -26,7 +26,7 @@ export async function fetchPricingPlans() {
       "800x800 Logo": true,
       "Download Unlimited Times": true,
     },
-    price_1RoX4VLOSucFQ0CmNoWm32sP: {
+    [productIds.Standard]: {
       "Create 1200 Logo": true,
       "Watermarked Logos": false,
       "High Quality Png": true,
@@ -34,7 +34,7 @@ export async function fetchPricingPlans() {
       "800x800 Logo": true,
       "Download Unlimited Times": true,
     },
-    price_1RoX6VLOSucFQ0Cm7VPn0XZv: {
+    [productIds.Premium]: {
       "Create 1800 Logo": true,
       "Watermarked Logos": false,
       "High Quality Png": true,
@@ -46,19 +46,27 @@ export async function fetchPricingPlans() {
 
   const order = { Basic: 0, Standard: 1, Premium: 2 };
 
-  const plans = prices.data.map((p) => {
-    const cents = p.unit_amount ?? 0;
-    let name = "";
-    if (p.id === "price_1RolOHLOSucFQ0Cm1lvP2QvC") name = "Basic";
-    else if (p.id === "price_1RoX4VLOSucFQ0CmNoWm32sP") name = "Standard";
-    else if (p.id === "price_1RoX6VLOSucFQ0Cm7VPn0XZv") name = "Premium";
-    else name = p.id;
+  // Fetch all active prices
+  const prices = await stripe.prices.list({ active: true, limit: 20 });
+
+  // Find the latest active price for each product
+  function getLatestPrice(productId) {
+    const productPrices = prices.data.filter(
+      (p) => p.product === productId && p.active
+    );
+    // You can add logic to select price by currency, type, etc. if needed
+    return productPrices.sort((a, b) => b.created - a.created)[0];
+  }
+
+  const plans = Object.entries(productIds).map(([name, productId]) => {
+    const priceObj = getLatestPrice(productId);
+    const cents = priceObj?.unit_amount ?? 0;
     return {
       name,
-      pricingId: p.id,
+      pricingId: priceObj?.id || "",
       price: `$${(cents / 100).toFixed(2)}`,
-      credits: planCredits[p.id] || 0,
-      features: planFeatures[p.id] || {},
+      credits: planCredits[productId] || 0,
+      features: planFeatures[productId] || {},
     };
   });
 
