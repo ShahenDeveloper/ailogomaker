@@ -3,12 +3,15 @@ import { stripe } from "../../../lib/stripe";
 
 export async function fetchPricingPlans() {
   const productIds = {
-    // Basic: "prod_Sk14EOAwxQFgzj", //  Basic
-    // Standard: "prod_Sk16ZF1p1I2vdx", //  Standard
-    // Premium: "prod_Sk18C3KKCmSRQa", //  Premium
-    Basic: "prod_Skw0FM5XQ3zodM", //  Basic
-    Standard: "prod_Skw0ZxLIap9Tog", //  Standard
-    Premium: "prod_Skw11vjvPLocDz", //  Premium
+    // live product id
+    Basic: "prod_Sk14EOAwxQFgzj", //  Basic
+    Standard: "prod_Sk16ZF1p1I2vdx", //  Standard
+    Premium: "prod_Sk18C3KKCmSRQa", //  Premium
+
+    // test product id
+    // Basic: "prod_Skw0FM5XQ3zodM", //  Basic
+    // Standard: "prod_Skw0ZxLIap9Tog", //  Standard
+    // Premium: "prod_Skw11vjvPLocDz", //  Premium
   };
 
   const planCredits = {
