@@ -8,7 +8,7 @@ export async function POST(req) {
   const sig = req.headers.get("Stripe-Signature");
   if (!sig) {
     console.error("Missing Stripe-Signature header");
-    return c.json({ error: "Missing Stripe-Signature header" }, 400);
+    return NextResponse.json({ error: "Missing Stripe-Signature header" }, 400);
   }
   let event;
 
@@ -111,7 +111,9 @@ export async function POST(req) {
       nextRenewal: new Date(invoice.period_end * 1000).toISOString(),
     });
 
-    console.log(` Added ${creditsToAdd} credits to ${email} for the ${planName} plan`);
+    console.log(
+      ` Added ${creditsToAdd} credits to ${email} for the ${planName} plan`
+    );
   }
 
   return NextResponse.json({ received: true });

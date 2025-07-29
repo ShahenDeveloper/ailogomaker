@@ -5,20 +5,20 @@ export async function fetchPricingPlans() {
   const prices = await stripe.prices.list({ active: true, limit: 10 });
 
   const planCredits = {
-
     // test sstripe product prices
     // price_1RpQ8QLOSucFQ0CmP14hYUPk: 300, // Basic
     // price_1RpQ8iLOSucFQ0Cm7kCjKqLp: 1000, // Standard
     // price_1RpQ9RLOSucFQ0CmsNQ1Huvk: 2100, // Premium
 
     // live stripe product prices
-    price_1RoX2TLOSucFQ0CmRbu4fWJr: 300, // Basic
+    price_1RolOHLOSucFQ0Cm1lvP2QvC: 300, // Basic 0.5$ price
+    // price_1RoX2TLOSucFQ0CmRbu4fWJr: 300, // Basic 2$ price
     price_1RoX4VLOSucFQ0CmNoWm32sP: 1000, // Standard
     price_1RoX6VLOSucFQ0Cm7VPn0XZv: 2100, // Premium
   };
 
   const planFeatures = {
-    price_1RoX2TLOSucFQ0CmRbu4fWJr: {
+    price_1RolOHLOSucFQ0Cm1lvP2QvC: {
       "Create 300 Logo": true,
       "Watermarked Logos": false,
       "High Quality Png": true,
@@ -49,7 +49,7 @@ export async function fetchPricingPlans() {
   const plans = prices.data.map((p) => {
     const cents = p.unit_amount ?? 0;
     let name = "";
-    if (p.id === "price_1RoX2TLOSucFQ0CmRbu4fWJr") name = "Basic";
+    if (p.id === "price_1RolOHLOSucFQ0Cm1lvP2QvC") name = "Basic";
     else if (p.id === "price_1RoX4VLOSucFQ0CmNoWm32sP") name = "Standard";
     else if (p.id === "price_1RoX6VLOSucFQ0Cm7VPn0XZv") name = "Premium";
     else name = p.id;
